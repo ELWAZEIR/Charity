@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2E7D32;
+  --primary-light: #4CAF50;
+  --primary-dark: #1B5E20;
+  --secondary: #EF6C00;
+  --secondary-light: #FF9800;
+  --accent: #1976D2;
+  --background: #F5F7FA;
+  --surface: #FFFFFF;
+  --error: #D32F2F;
+  --warning: #FFA000;
+  --success: #388E3C;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --border: #E0E0E0;
+}
+
+html, body {
+  font-family: 'Noto Kufi Arabic', sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#2E7D32] hover:bg-[#1B5E20] text-white font-medium py-2 px-4 rounded-md transition-all duration-200 ease-in-out;
+  }
+  
+  .btn-secondary {
+    @apply bg-[#EF6C00] hover:bg-[#E65100] text-white font-medium py-2 px-4 rounded-md transition-all duration-200 ease-in-out;
+  }
+  
+  .btn-outline {
+    @apply border border-[#2E7D32] text-[#2E7D32] hover:bg-[#E8F5E9] font-medium py-2 px-4 rounded-md transition-all duration-200 ease-in-out;
+  }
+  
+  .input-field {
+    @apply w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4CAF50] focus:border-transparent;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200;
+  }
+  
+  .badge-orphan {
+    @apply bg-[#D32F2F] text-white text-xs px-2 py-1 rounded-full;
+  }
+  
+  .badge-a {
+    @apply bg-[#FFA000] text-white text-xs px-2 py-1 rounded-full;
+  }
+  
+  .badge-b {
+    @apply bg-[#1976D2] text-white text-xs px-2 py-1 rounded-full;
+  }
+  
+  .inventory-low {
+    @apply text-[#D32F2F] font-bold;
+  }
+  
+  .inventory-medium {
+    @apply text-[#FFA000] font-bold;
+  }
+  
+  .inventory-high {
+    @apply text-[#388E3C] font-bold;
+  }
+}
