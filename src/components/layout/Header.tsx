@@ -18,7 +18,7 @@ const Header = ({ setSidebarOpen }: HeaderProps) => {
               <Menu size={24} />
             </button>
             <div className="hidden md:block">
-              <h1 className="text-2xl font-semibold text-primary">نظام إدارة الجمعية الخيرية</h1>
+              <h1 className="text-2xl font-semibold text-primary">نظام إدارة الجمعية آفاق مصريه</h1>
             </div>
           </div>
           
