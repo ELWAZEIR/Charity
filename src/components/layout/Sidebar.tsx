@@ -41,7 +41,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <div className="flex items-center justify-between h-16 px-4 border-b">
             <div className="flex items-center">
               <Heart size={28} className="text-primary" />
-              <h2 className="text-xl font-bold text-primary mr-2">جمعية الخير</h2>
+              <h2 className="text-xl font-bold text-primary mr-2">آفاق مصريه</h2>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -76,7 +76,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
             <div className="bg-primary bg-opacity-10 text-primary rounded-md p-4">
-              <p className="text-sm font-medium">أهلاً بك في نظام إدارة الجمعية الخيرية</p>
+              <p className="text-sm font-medium">أهلاً بك في نظام إدارة جمعية آفاق مصريه الخيرية</p>
               <p className="text-xs mt-1">إصدار 1.0.0</p>
             </div>
           </div>
