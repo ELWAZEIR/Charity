@@ -3,11 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Save } from 'lucide-react';
 import { useBeneficiaryStore } from '../stores/beneficiaryStore';
 import { BeneficiaryCategory, MaritalStatus } from '../types';
+import TextInput from '../components/common/TextInput';
+import SelectInput from '../components/common/SelectInput';
+import TextareaInput from '../components/common/TextareaInput';
 
-const AddBeneficiary: React.FC = () => {
+
+
+const AddBeneficiary = () => {
   const navigate = useNavigate();
   const { addBeneficiary } = useBeneficiaryStore();
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
@@ -21,7 +26,7 @@ const AddBeneficiary: React.FC = () => {
     address: '',
     notes: '',
   });
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -29,7 +34,7 @@ const AddBeneficiary: React.FC = () => {
       [name]: value,
     }));
   };
-  
+
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -37,216 +42,148 @@ const AddBeneficiary: React.FC = () => {
       [name]: parseInt(value, 10) || 0,
     }));
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     addBeneficiary({
       ...formData,
       lastDistribution: null,
     });
-    
     navigate('/beneficiaries');
   };
-  
+
   return (
     <div className="animate-fade-in">
       <div className="flex items-center mb-6">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="flex items-center text-gray-600 hover:text-primary"
-        >
+        <button onClick={() => navigate(-1)} className="flex items-center text-gray-600 hover:text-primary">
           <ChevronRight size={20} />
           <span className="mr-1">رجوع</span>
         </button>
         <h1 className="text-2xl font-bold mr-4">إضافة مستفيد جديد</h1>
       </div>
-      
+
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                الاسم الأول <span className="text-error">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                required
-                className="input-field"
-                value={formData.firstName}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="secondName" className="block text-sm font-medium text-gray-700 mb-1">
-                اسم الأب <span className="text-error">*</span>
-              </label>
-              <input
-                type="text"
-                id="secondName"
-                name="secondName"
-                required
-                className="input-field"
-                value={formData.secondName}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="thirdName" className="block text-sm font-medium text-gray-700 mb-1">
-                اسم الجد <span className="text-error">*</span>
-              </label>
-              <input
-                type="text"
-                id="thirdName"
-                name="thirdName"
-                required
-                className="input-field"
-                value={formData.thirdName}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                اسم العائلة <span className="text-error">*</span>
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                required
-                className="input-field"
-                value={formData.lastName}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
-                تاريخ الميلاد <span className="text-error">*</span>
-              </label>
-              <input
-                type="date"
-                id="dateOfBirth"
-                name="dateOfBirth"
-                required
-                className="input-field"
-                value={formData.dateOfBirth}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                التصنيف <span className="text-error">*</span>
-              </label>
-              <select
-                id="category"
-                name="category"
-                required
-                className="input-field"
-                value={formData.category}
-                onChange={handleInputChange}
-              >
-                <option value="orphans">أيتام</option>
-                <option value="a">فئة أ</option>
-                <option value="b">فئة ب</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="maritalStatus" className="block text-sm font-medium text-gray-700 mb-1">
-                الحالة الاجتماعية <span className="text-error">*</span>
-              </label>
-              <select
-                id="maritalStatus"
-                name="maritalStatus"
-                required
-                className="input-field"
-                value={formData.maritalStatus}
-                onChange={handleInputChange}
-              >
-                <option value="single">أعزب/عزباء</option>
-                <option value="married">متزوج/ة</option>
-                <option value="divorced">مطلق/ة</option>
-                <option value="widowed">أرمل/ة</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="childrenCount" className="block text-sm font-medium text-gray-700 mb-1">
-                عدد الأولاد
-              </label>
-              <input
-                type="number"
-                id="childrenCount"
-                name="childrenCount"
-                min="0"
-                className="input-field"
-                value={formData.childrenCount}
-                onChange={handleNumberChange}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                رقم الهاتف <span className="text-error">*</span>
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                required
-                className="input-field"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="md:col-span-2">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                العنوان <span className="text-error">*</span>
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                required
-                className="input-field"
-                value={formData.address}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="md:col-span-2">
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                ملاحظات
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                rows={3}
-                className="input-field"
-                value={formData.notes}
-                onChange={handleInputChange}
-              />
-            </div>
+            <TextInput
+              id="firstName"
+              name="firstName"
+              label="الاسم الأول"
+              required
+              value={formData.firstName}
+              onChange={handleInputChange}
+            />
+
+            <TextInput
+              id="secondName"
+              name="secondName"
+              label="اسم الأب"
+              required
+              value={formData.secondName}
+              onChange={handleInputChange}
+            />
+
+            <TextInput
+              id="thirdName"
+              name="thirdName"
+              label="اسم الجد"
+              required
+              value={formData.thirdName}
+              onChange={handleInputChange}
+            />
+
+            <TextInput
+              id="lastName"
+              name="lastName"
+              label="اسم العائلة"
+              required
+              value={formData.lastName}
+              onChange={handleInputChange}
+            />
+
+            <TextInput
+              id="dateOfBirth"
+              name="dateOfBirth"
+              type="date"
+              label="تاريخ الميلاد"
+              required
+              value={formData.dateOfBirth}
+              onChange={handleInputChange}
+            />
+
+            <SelectInput
+              id="category"
+              name="category"
+              label="التصنيف"
+              required
+              value={formData.category}
+              onChange={handleInputChange}
+              options={[
+                { value: 'orphans', label: 'أيتام' },
+                { value: 'a', label: 'فئة أ' },
+                { value: 'b', label: 'فئة ب' },
+              ]}
+            />
+
+            <SelectInput
+              id="maritalStatus"
+              name="maritalStatus"
+              label="الحالة الاجتماعية"
+              required
+              value={formData.maritalStatus}
+              onChange={handleInputChange}
+              options={[
+                { value: 'single', label: 'أعزب/عزباء' },
+                { value: 'married', label: 'متزوج/ة' },
+                { value: 'divorced', label: 'مطلق/ة' },
+                { value: 'widowed', label: 'أرمل/ة' },
+              ]}
+            />
+
+            <TextInput
+              id="childrenCount"
+              name="childrenCount"
+              type="number"
+              label="عدد الأولاد"
+              value={formData.childrenCount.toString()}
+              onChange={handleNumberChange}
+            />
+
+            <TextInput
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              label="رقم الهاتف"
+              required
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+            />
+
+            <TextInput
+              id="address"
+              name="address"
+              label="العنوان"
+              required
+              fullWidth
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+
+            <TextareaInput
+              id="notes"
+              name="notes"
+              label="ملاحظات"
+              value={formData.notes}
+              onChange={handleInputChange}
+            />
           </div>
-          
+
           <div className="mt-6 flex justify-start">
             <button type="submit" className="btn-primary flex items-center">
               <Save size={18} className="ml-2" />
               حفظ المستفيد
             </button>
-            <button 
-              type="button" 
-              className="btn-outline mr-4"
-              onClick={() => navigate('/beneficiaries')}
-            >
+            <button type="button" className="btn-outline mr-4" onClick={() => navigate('/beneficiaries')}>
               إلغاء
             </button>
           </div>
