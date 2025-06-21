@@ -2,6 +2,8 @@ export type BeneficiaryCategory = 'orphans' | 'a' | 'b';
 
 export type MaritalStatus = 'single' | 'married' | 'divorced' | 'widowed';
 
+export type InventoryItemType = 'food' | 'non-food';
+
 export interface Beneficiary {
   id: string;
   firstName: string;
@@ -19,8 +21,6 @@ export interface Beneficiary {
   createdAt: string;
   distributions: Distribution[];
 }
-
-export type InventoryItemType = 'food' | 'non-food';
 
 export interface InventoryItem {
   id: string;

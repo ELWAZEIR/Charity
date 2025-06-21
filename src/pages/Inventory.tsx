@@ -1,91 +1,121 @@
-import React, { useState } from 'react';
-import { useInventoryStore } from '../stores/inventoryStore';
-import { Plus, Search, Filter, PackagePlus, Clipboard, ArrowUpDown } from 'lucide-react';
-import InventoryStatus from '../components/ui/InventoryStatus';
+import React, { useState } from "react";
+import { useInventoryStore } from "../stores/inventoryStore";
+import {
+  Plus,
+  Search,
+  Filter,
+  PackagePlus,
+  Clipboard,
+  ArrowUpDown,
+} from "lucide-react";
+import InventoryStatus from "../components/ui/InventoryStatus";
+import { InventoryItem } from "../types";
 
-const Inventory: React.FC = () => {
+const Inventory = () => {
   const { items, getItemsByType, getLowStockItems } = useInventoryStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [stockFilter, setStockFilter] = useState<string>('all');
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<string>("all");
+
+  const [editItem, setEditItem] = useState<InventoryItem | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  // Modal for adding new item
+  const [showAddModal, setShowAddModal] = useState(false);
+
   // Sorting
-  const [sortField, setSortField] = useState<string>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-  
+
   const handleSort = (field: string) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
-  
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat("ar-SA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(date);
   };
-  
+
   // Filtering
   let filteredItems = items.filter((item) => {
-    const nameMatch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const typeMatch = 
-      typeFilter === 'all' || 
-      (typeFilter === 'food' && item.type === 'food') ||
-      (typeFilter === 'non-food' && item.type === 'non-food');
-      
+    const nameMatch = item.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const typeMatch =
+      typeFilter === "all" ||
+      (typeFilter === "food" && item.type === "food") ||
+      (typeFilter === "non-food" && item.type === "non-food");
+
     const stockMatch =
-      stockFilter === 'all' ||
-      (stockFilter === 'low' && item.quantity < item.minimumLevel) ||
-      (stockFilter === 'medium' && item.quantity >= item.minimumLevel && item.quantity < item.minimumLevel * 1.5) ||
-      (stockFilter === 'high' && item.quantity >= item.minimumLevel * 1.5);
-      
+      stockFilter === "all" ||
+      (stockFilter === "low" && item.quantity < item.minimumLevel) ||
+      (stockFilter === "medium" &&
+        item.quantity >= item.minimumLevel &&
+        item.quantity < item.minimumLevel * 1.5) ||
+      (stockFilter === "high" && item.quantity >= item.minimumLevel * 1.5);
+
     return nameMatch && typeMatch && stockMatch;
   });
-  
+
   // Sorting
   filteredItems.sort((a, b) => {
     let comparison = 0;
-    
-    if (sortField === 'name') {
+
+    if (sortField === "name") {
       comparison = a.name.localeCompare(b.name);
-    } else if (sortField === 'quantity') {
+    } else if (sortField === "quantity") {
       comparison = a.quantity - b.quantity;
-    } else if (sortField === 'lastUpdated') {
-      comparison = new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime();
+    } else if (sortField === "lastUpdated") {
+      comparison =
+        new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime();
     }
-    
-    return sortDirection === 'asc' ? comparison : -comparison;
+
+    return sortDirection === "asc" ? comparison : -comparison;
   });
-  
+
   const getSortIndicator = (field: string) => {
     if (sortField !== field) return null;
-    return sortDirection === 'asc' ? '↑' : '↓';
+    return sortDirection === "asc" ? "↑" : "↓";
   };
-  
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("هل أنت متأكد من حذف هذا الصنف؟")) {
+      useInventoryStore.getState().removeItem(id);
+    }
+  };
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-2xl font-bold mb-4 md:mb-0">المخزون</h1>
-        
+
         <div className="flex flex-col sm:flex-row gap-2">
           <button className="btn-outline flex items-center justify-center">
             <Clipboard size={18} className="ml-2" />
             تصدير البيانات
           </button>
-          <button className="btn-primary flex items-center justify-center">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-primary flex items-center justify-center"
+          >
             <PackagePlus size={18} className="ml-2" />
             إضافة صنف جديد
           </button>
         </div>
       </div>
-      
+
       <div className="card mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
@@ -100,7 +130,7 @@ const Inventory: React.FC = () => {
               onChange={handleSearch}
             />
           </div>
-          
+
           <div className="flex items-center">
             <Filter size={18} className="text-gray-500 ml-2" />
             <select
@@ -113,7 +143,7 @@ const Inventory: React.FC = () => {
               <option value="non-food">مواد غير غذائية</option>
             </select>
           </div>
-          
+
           <div className="flex items-center">
             <Filter size={18} className="text-gray-500 ml-2" />
             <select
@@ -129,53 +159,127 @@ const Inventory: React.FC = () => {
           </div>
         </div>
       </div>
-      
+{showAddModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h2 className="text-lg font-bold mb-4">إضافة صنف جديد</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const target = e.target as any;
+          const name = target.name.value;
+          const type = target.type.value;
+          const unit = target.unit.value;
+          const quantity = parseInt(target.quantity.value, 10);
+          const minimumLevel = parseInt(target.minimumLevel.value, 10);
+          const notes = target.notes.value;
+
+          useInventoryStore.getState().addItem({
+            name,
+            type,
+            unit,
+            quantity,
+            minimumLevel,
+            notes,
+          });
+
+          setShowAddModal(false);
+        }}
+      >
+        <input name="name" placeholder="اسم الصنف" className="input-field mb-2 w-full" required />
+        
+        <select name="type" className="input-field mb-2 w-full" required>
+          <option value="">اختر النوع</option>
+          <option value="food">مواد غذائية</option>
+          <option value="non-food">مواد غير غذائية</option>
+        </select>
+
+        <input name="unit" placeholder="الوحدة (مثال: كجم، قطعة)" className="input-field mb-2 w-full" required />
+        <input name="quantity" type="number" placeholder="الكمية" className="input-field mb-2 w-full" required />
+        <input name="minimumLevel" type="number" placeholder="الحد الأدنى" className="input-field mb-2 w-full" required />
+        <textarea name="notes" placeholder="ملاحظات" className="input-field mb-4 w-full" />
+
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAddModal(false)}
+            className="btn-outline"
+          >
+            إلغاء
+          </button>
+          <button type="submit" className="btn-primary">
+            إضافة
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
       {filteredItems.length > 0 ? (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('name')}
+                    onClick={() => handleSort("name")}
                   >
                     <div className="flex items-center justify-end">
-                      اسم الصنف {getSortIndicator('name')}
-                      {sortField === 'name' && <ArrowUpDown size={14} className="mr-1" />}
+                      اسم الصنف {getSortIndicator("name")}
+                      {sortField === "name" && (
+                        <ArrowUpDown size={14} className="mr-1" />
+                      )}
                     </div>
                   </th>
-                  <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     النوع
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('quantity')}
+                    onClick={() => handleSort("quantity")}
                   >
                     <div className="flex items-center justify-end">
-                      الكمية المتوفرة {getSortIndicator('quantity')}
-                      {sortField === 'quantity' && <ArrowUpDown size={14} className="mr-1" />}
+                      الكمية المتوفرة {getSortIndicator("quantity")}
+                      {sortField === "quantity" && (
+                        <ArrowUpDown size={14} className="mr-1" />
+                      )}
                     </div>
                   </th>
-                  <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     الحد الأدنى
                   </th>
-                  <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     الحالة
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('lastUpdated')}
+                    onClick={() => handleSort("lastUpdated")}
                   >
                     <div className="flex items-center justify-end">
-                      آخر تحديث {getSortIndicator('lastUpdated')}
-                      {sortField === 'lastUpdated' && <ArrowUpDown size={14} className="mr-1" />}
+                      آخر تحديث {getSortIndicator("lastUpdated")}
+                      {sortField === "lastUpdated" && (
+                        <ArrowUpDown size={14} className="mr-1" />
+                      )}
                     </div>
                   </th>
-                  <th scope="col" className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     إجراءات
                   </th>
                 </tr>
@@ -184,21 +288,27 @@ const Inventory: React.FC = () => {
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.name}
+                      </div>
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap">
                       <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                        {item.type === 'food' ? 'مواد غذائية' : 'مواد غير غذائية'}
+                        {item.type === "food"
+                          ? "مواد غذائية"
+                          : "مواد غير غذائية"}
                       </span>
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm">
-                      <span className={`font-semibold ${
-                        item.quantity < item.minimumLevel 
-                          ? 'text-error' 
-                          : item.quantity < item.minimumLevel * 1.5 
-                          ? 'text-warning' 
-                          : 'text-success'
-                      }`}>
+                      <span
+                        className={`font-semibold ${
+                          item.quantity < item.minimumLevel
+                            ? "text-error"
+                            : item.quantity < item.minimumLevel * 1.5
+                            ? "text-warning"
+                            : "text-success"
+                        }`}
+                      >
                         {item.quantity} {item.unit}
                       </span>
                     </td>
@@ -206,9 +316,9 @@ const Inventory: React.FC = () => {
                       {item.minimumLevel} {item.unit}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap">
-                      <InventoryStatus 
-                        current={item.quantity} 
-                        minimum={item.minimumLevel} 
+                      <InventoryStatus
+                        current={item.quantity}
+                        minimum={item.minimumLevel}
                       />
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500">
@@ -216,10 +326,19 @@ const Inventory: React.FC = () => {
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2 space-x-reverse">
-                        <button className="text-primary hover:text-primary-dark ml-2">
+                        <button
+                          onClick={() => {
+                            setEditItem(item);
+                            setShowEditModal(true);
+                          }}
+                          className="text-primary hover:text-primary-dark ml-2"
+                        >
                           تعديل
                         </button>
-                        <button className="text-error hover:text-red-700">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="text-error hover:text-red-700"
+                        >
                           حذف
                         </button>
                       </div>
@@ -228,11 +347,81 @@ const Inventory: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            {showEditModal && editItem && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <h2 className="text-lg font-bold mb-4">
+                    تعديل الصنف: {editItem.name}
+                  </h2>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const updatedName = (e.target as any).name.value;
+                      const updatedQuantity = parseInt(
+                        (e.target as any).quantity.value,
+                        10
+                      );
+                      const updatedNotes = (e.target as any).notes.value;
+
+                      useInventoryStore.getState().updateItem(editItem.id, {
+                        name: updatedName,
+                        quantity: updatedQuantity,
+                        notes: updatedNotes,
+                      });
+
+                      setShowEditModal(false);
+                      setEditItem(null);
+                    }}
+                  >
+                    <label className="block mb-2">الاسم</label>
+                    <input
+                      name="name"
+                      defaultValue={editItem.name}
+                      className="input-field mb-4 w-full"
+                    />
+
+                    <label className="block mb-2">الكمية</label>
+                    <input
+                      name="quantity"
+                      type="number"
+                      defaultValue={editItem.quantity}
+                      className="input-field mb-4 w-full"
+                    />
+
+                    <label className="block mb-2">ملاحظات</label>
+                    <textarea
+                      name="notes"
+                      defaultValue={editItem.notes}
+                      className="input-field mb-4 w-full"
+                    />
+
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowEditModal(false);
+                          setEditItem(null);
+                        }}
+                        className="btn-outline"
+                      >
+                        إلغاء
+                      </button>
+                      <button type="submit" className="btn-primary">
+                        حفظ
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <div className="text-gray-500 mb-4">لا توجد أصناف تطابق معايير البحث</div>
+          <div className="text-gray-500 mb-4">
+            لا توجد أصناف تطابق معايير البحث
+          </div>
           <button className="btn-primary inline-flex items-center">
             <Plus size={18} className="ml-2" />
             إضافة صنف جديد

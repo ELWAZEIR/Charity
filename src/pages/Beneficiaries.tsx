@@ -4,7 +4,7 @@ import { PlusCircle, Search, Filter, UserPlus } from 'lucide-react';
 import { useBeneficiaryStore } from '../stores/beneficiaryStore';
 import CategoryBadge from '../components/ui/CategoryBadge';
 
-const Beneficiaries: React.FC = () => {
+const Beneficiaries = () => {
   const { beneficiaries, searchBeneficiaries } = useBeneficiaryStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
