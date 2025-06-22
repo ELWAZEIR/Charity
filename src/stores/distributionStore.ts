@@ -7,7 +7,7 @@ interface DistributionState {
   loading: boolean;
   error: string | null;
   
-  // Actions
+  // Actions 
   addDistribution: (distribution: Omit<Distribution, 'id'>) => string | null;
   getDistributionsByBeneficiary: (beneficiaryId: string) => Distribution[];
   getRecentDistributions: (limit?: number) => Distribution[];

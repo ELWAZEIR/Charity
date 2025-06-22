@@ -6,7 +6,7 @@ import CategoryBadge from '../components/ui/CategoryBadge';
 
 const Beneficiaries: React.FC = () => {
   const {
-    beneficiaries,
+    // beneficiaries,
     searchBeneficiaries,
     fetchBeneficiaries,
     loading,

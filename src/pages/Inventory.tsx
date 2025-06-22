@@ -315,7 +315,7 @@ const Inventory: React.FC = () => {
           <div className="text-gray-500 mb-4">
             لا توجد أصناف تطابق معايير البحث
           </div>
-          <button className="btn-primary inline-flex items-center">
+          <button onClick={() => setShowEditModal(true)} className="btn-primary inline-flex items-center">
             <Plus size={18} className="ml-2" />
             إضافة صنف جديد
           </button>
