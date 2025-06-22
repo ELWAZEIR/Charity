@@ -5,7 +5,12 @@ import { useBeneficiaryStore } from '../stores/beneficiaryStore';
 import { useInventoryStore } from '../stores/inventoryStore';
 
 const Dashboard: React.FC = () => {
-  const { beneficiaries, getBeneficiariesByCategory } = useBeneficiaryStore();
+  const { beneficiaries } = useBeneficiaryStore();
+
+  // Helper to get beneficiaries by category
+  const getBeneficiariesByCategory = (category: string) => {
+    return beneficiaries.filter(b => b.category === category);
+  };
   const { items, getLowStockItems } = useInventoryStore();
   
   const orphansCount = getBeneficiariesByCategory('orphans').length;
