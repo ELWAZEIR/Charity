@@ -1,30 +1,25 @@
-import React, { useState } from "react";
-import { useInventoryStore } from "../stores/inventoryStore";
-import {
-  Plus,
-  Search,
-  Filter,
-  PackagePlus,
-  Clipboard,
-  ArrowUpDown,
-} from "lucide-react";
-import InventoryStatus from "../components/ui/InventoryStatus";
-import { InventoryItem } from "../types";
+import React, { useEffect, useState } from 'react';
+import { useInventoryStore } from '../stores/inventoryStore';
+import { Plus, Search, Filter, PackagePlus, Clipboard, ArrowUpDown } from 'lucide-react';
+import InventoryStatus from '../components/ui/InventoryStatus';
 
-const Inventory = () => {
-  const { items, getItemsByType, getLowStockItems } = useInventoryStore();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [stockFilter, setStockFilter] = useState<string>("all");
+const Inventory: React.FC = () => {
+  const { items, fetchInventory, loading, error } = useInventoryStore();
 
-  const [editItem, setEditItem] = useState<InventoryItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [stockFilter, setStockFilter] = useState<string>('all');
+
+  const [sortField, setSortField] = useState<string>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // State for modals
   const [showEditModal, setShowEditModal] = useState(false);
-  // Modal for adding new item
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
 
-  // Sorting
-  const [sortField, setSortField] = useState<string>("name");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  useEffect(() => {
+    fetchInventory();
+  }, [fetchInventory]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -50,22 +45,18 @@ const Inventory = () => {
 
   // Filtering
   let filteredItems = items.filter((item) => {
-    const nameMatch = item.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const nameMatch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
 
     const typeMatch =
-      typeFilter === "all" ||
-      (typeFilter === "food" && item.type === "food") ||
-      (typeFilter === "non-food" && item.type === "non-food");
+      typeFilter === 'all' ||
+      (typeFilter === 'food' && item.type === 'food') ||
+      (typeFilter === 'non-food' && item.type === 'non-food');
 
     const stockMatch =
-      stockFilter === "all" ||
-      (stockFilter === "low" && item.quantity < item.minimumLevel) ||
-      (stockFilter === "medium" &&
-        item.quantity >= item.minimumLevel &&
-        item.quantity < item.minimumLevel * 1.5) ||
-      (stockFilter === "high" && item.quantity >= item.minimumLevel * 1.5);
+      stockFilter === 'all' ||
+      (stockFilter === 'low' && item.quantity < item.minimumLevel) ||
+      (stockFilter === 'medium' && item.quantity >= item.minimumLevel && item.quantity < item.minimumLevel * 1.5) ||
+      (stockFilter === 'high' && item.quantity >= item.minimumLevel * 1.5);
 
     return nameMatch && typeMatch && stockMatch;
   });
@@ -74,7 +65,7 @@ const Inventory = () => {
   filteredItems.sort((a, b) => {
     let comparison = 0;
 
-    if (sortField === "name") {
+    if (sortField === 'name') {
       comparison = a.name.localeCompare(b.name);
     } else if (sortField === "quantity") {
       comparison = a.quantity - b.quantity;
@@ -83,7 +74,7 @@ const Inventory = () => {
         new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime();
     }
 
-    return sortDirection === "asc" ? comparison : -comparison;
+    return sortDirection === 'asc' ? comparison : -comparison;
   });
 
   const getSortIndicator = (field: string) => {
@@ -91,11 +82,6 @@ const Inventory = () => {
     return sortDirection === "asc" ? "↑" : "↓";
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا الصنف؟")) {
-      useInventoryStore.getState().removeItem(id);
-    }
-  };
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -107,7 +93,7 @@ const Inventory = () => {
             تصدير البيانات
           </button>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => setShowEditModal(true)}
             className="btn-primary flex items-center justify-center"
           >
             <PackagePlus size={18} className="ml-2" />
@@ -133,11 +119,7 @@ const Inventory = () => {
 
           <div className="flex items-center">
             <Filter size={18} className="text-gray-500 ml-2" />
-            <select
-              className="input-field"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
+            <select className="input-field" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
               <option value="all">جميع الأنواع</option>
               <option value="food">مواد غذائية</option>
               <option value="non-food">مواد غير غذائية</option>
@@ -146,11 +128,7 @@ const Inventory = () => {
 
           <div className="flex items-center">
             <Filter size={18} className="text-gray-500 ml-2" />
-            <select
-              className="input-field"
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value)}
-            >
+            <select className="input-field" value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
               <option value="all">كل المستويات</option>
               <option value="low">منخفض</option>
               <option value="medium">متوسط</option>
@@ -159,71 +137,18 @@ const Inventory = () => {
           </div>
         </div>
       </div>
-{showAddModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-      <h2 onClick={() => setShowAddModal(true)} className="text-lg font-bold mb-4">إضافة صنف جديد</h2>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const target = e.target as any;
-          const name = target.name.value;
-          const type = target.type.value;
-          const unit = target.unit.value;
-          const quantity = parseInt(target.quantity.value, 10);
-          const minimumLevel = parseInt(target.minimumLevel.value, 10);
-          const notes = target.notes.value;
 
-          useInventoryStore.getState().addItem({
-            name,
-            type,
-            unit,
-            quantity,
-            minimumLevel,
-            notes,
-          });
-
-          setShowAddModal(false);
-        }}
-      >
-        <input name="name" placeholder="اسم الصنف" className="input-field mb-2 w-full" required />
-        
-        <select name="type" className="input-field mb-2 w-full" required>
-          <option value="">اختر النوع</option>
-          <option value="food">مواد غذائية</option>
-          <option value="non-food">مواد غير غذائية</option>
-        </select>
-
-        <input name="unit" placeholder="الوحدة (مثال: كجم، قطعة)" className="input-field mb-2 w-full" required />
-        <input name="quantity" type="number" placeholder="الكمية" className="input-field mb-2 w-full" required />
-        <input name="minimumLevel" type="number" placeholder="الحد الأدنى" className="input-field mb-2 w-full" required />
-        <textarea name="notes" placeholder="ملاحظات" className="input-field mb-4 w-full" />
-
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setShowAddModal(false)}
-            className="btn-outline"
-          >
-            إلغاء
-          </button>
-          <button type="submit" className="btn-primary">
-            إضافة
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
-      {filteredItems.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-8">جاري التحميل...</div>
+      ) : error ? (
+        <div className="text-center text-red-600 py-8">حدث خطأ: {error}</div>
+      ) : filteredItems.length > 0 ? (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th
-                    scope="col"
                     className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort("name")}
                   >
@@ -234,14 +159,10 @@ const Inventory = () => {
                       )}
                     </div>
                   </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     النوع
                   </th>
                   <th
-                    scope="col"
                     className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort("quantity")}
                   >
@@ -252,20 +173,13 @@ const Inventory = () => {
                       )}
                     </div>
                   </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  {/* <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الحد الأدنى
-                  </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  </th> */}
+                  <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الحالة
                   </th>
                   <th
-                    scope="col"
                     className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort("lastUpdated")}
                   >
@@ -276,10 +190,7 @@ const Inventory = () => {
                       )}
                     </div>
                   </th>
-                  <th
-                    scope="col"
-                    className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     إجراءات
                   </th>
                 </tr>
@@ -287,10 +198,8 @@ const Inventory = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {item.name}
-                      </div>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {item.name}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap">
                       <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
@@ -303,10 +212,10 @@ const Inventory = () => {
                       <span
                         className={`font-semibold ${
                           item.quantity < item.minimumLevel
-                            ? "text-error"
+                            ? 'text-error'
                             : item.quantity < item.minimumLevel * 1.5
-                            ? "text-warning"
-                            : "text-success"
+                            ? 'text-warning'
+                            : 'text-success'
                         }`}
                       >
                         {item.quantity} {item.unit}
@@ -316,31 +225,15 @@ const Inventory = () => {
                       {item.minimumLevel} {item.unit}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap">
-                      <InventoryStatus
-                        current={item.quantity}
-                        minimum={item.minimumLevel}
-                      />
+                      <InventoryStatus current={item.quantity} minimum={item.minimumLevel} />
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(item.lastUpdated)}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2 space-x-reverse">
-                        <button
-                          onClick={() => {
-                            setEditItem(item);
-                            setShowEditModal(true);
-                          }}
-                          className="text-primary hover:text-primary-dark ml-2"
-                        >
-                          تعديل
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="text-error hover:text-red-700"
-                        >
-                          حذف
-                        </button>
+                        <button className="text-primary hover:text-primary-dark ml-2">تعديل</button>
+                        <button className="text-error hover:text-red-700">حذف</button>
                       </div>
                     </td>
                   </tr>
@@ -422,7 +315,7 @@ const Inventory = () => {
           <div className="text-gray-500 mb-4">
             لا توجد أصناف تطابق معايير البحث
           </div>
-          <button onClick={() => setShowAddModal(true)} className="btn-primary inline-flex items-center">
+          <button onClick={() => setShowEditModal(true)} className="btn-primary inline-flex items-center">
             <Plus size={18} className="ml-2" />
             إضافة صنف جديد
           </button>
