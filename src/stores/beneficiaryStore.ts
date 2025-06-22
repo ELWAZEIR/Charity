@@ -19,6 +19,8 @@ interface BeneficiaryState {
 const generateDemoData = (): Beneficiary[] => {
   const categories: BeneficiaryCategory[] = ['orphans', 'a', 'b'];
   const maritalStatuses: MaritalStatus[] = ['single', 'married', 'divorced', 'widowed'];
+
+  
   const names = [
     { first: 'أحمد', second: 'محمد', third: 'علي', last: 'الخالدي' },
     { first: 'محمد', second: 'عبدالله', third: 'أحمد', last: 'العمري' },
@@ -57,7 +59,7 @@ const generateDemoData = (): Beneficiary[] => {
       createdAt: new Date(Date.now() - Math.floor(Math.random() * 365) * 24 * 60 * 60 * 1000).toISOString(),
       distributions: [],
     };
-  });
+  }); 
 };
 
 export const useBeneficiaryStore = create<BeneficiaryState>((set, get) => ({

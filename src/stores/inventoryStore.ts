@@ -18,6 +18,7 @@ interface InventoryState {
 
 // Generate some demo data
 const generateDemoInventory = (): InventoryItem[] => {
+
   const foodItems = [
     { name: 'لحمة', type: 'food', unit: 'كجم', min: 50 },
     { name: 'فراخ', type: 'food', unit: 'كجم', min: 100 },
@@ -33,7 +34,7 @@ const generateDemoInventory = (): InventoryItem[] => {
     { name: 'بلح', type: 'food', unit: 'كجم', min: 200 },
     { name: 'شعرية', type: 'food', unit: 'كجم', min: 100 },
   ] as const;
-  
+
   const nonFoodItems = [
     { name: 'بطاطين', type: 'non-food', unit: 'قطعة', min: 100 },
     { name: 'لحاف', type: 'non-food', unit: 'قطعة', min: 80 },

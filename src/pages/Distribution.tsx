@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Clock, Users, Filter, Search, ShoppingBag } from 'lucide-react';
 import { useDistributionStore } from '../stores/distributionStore';
 import { useBeneficiaryStore } from '../stores/beneficiaryStore';
+import { useInventoryStore } from '../stores/inventoryStore';
 
 const Distribution: React.FC = () => {
   const { distributions, getRecentDistributions } = useDistributionStore();
   const { beneficiaries, getBeneficiaryById } = useBeneficiaryStore();
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const [showDistributions, setShowDistributions] = useState(false);
+
   const recentDistributions = getRecentDistributions(20);
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,13 +41,71 @@ const Distribution: React.FC = () => {
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-2xl font-bold mb-4 md:mb-0">التوزيعات</h1>
-        
-        <button className="btn-primary flex items-center justify-center">
+
+        <button onClick={() => setShowDistributions(!showDistributions)} className="btn-primary flex items-center justify-center">
           <ShoppingBag size={18} className="ml-2" />
           توزيع جديد
         </button>
       </div>
-      
+      //
+{showDistributions && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h2 onClick={() => setShowDistributions(true)} className="text-lg font-bold mb-4">إضافة صنف جديد</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const target = e.target as any;
+          const name = target.name.value;
+          const type = target.type.value;
+          const unit = target.unit.value;
+          const quantity = parseInt(target.quantity.value, 10);
+          const minimumLevel = parseInt(target.minimumLevel.value, 10);
+          const notes = target.notes.value;
+
+          useInventoryStore.getState().addItem({
+            name,
+            type,
+            unit,
+            quantity,
+            minimumLevel,
+            notes,
+          });
+
+          setShowDistributions(false);
+        }}
+      >
+        <input name="name" placeholder="اسم الصنف" className="input-field mb-2 w-full" required />
+        
+        <select name="type" className="input-field mb-2 w-full" required>
+          <option value="">اختر النوع</option>
+          <option value="food">مواد غذائية</option>
+          <option value="non-food">مواد غير غذائية</option>
+        </select>
+
+        <input name="unit" placeholder="الوحدة (مثال: كجم، قطعة)" className="input-field mb-2 w-full" required />
+        <input name="quantity" type="number" placeholder="الكمية" className="input-field mb-2 w-full" required />
+        <input name="minimumLevel" type="number" placeholder="الحد الأدنى" className="input-field mb-2 w-full" required />
+        <textarea name="notes" placeholder="ملاحظات" className="input-field mb-4 w-full" />
+
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDistributions(false)}
+            className="btn-outline"
+          >
+            إلغاء
+          </button>
+          <button type="submit" className="btn-primary">
+            إضافة
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+      //
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <div className="card">
@@ -172,7 +232,7 @@ const Distribution: React.FC = () => {
             )}
             
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <button className="w-full btn-primary flex items-center justify-center">
+              <button onClick={() => setShowDistributions(true)} className="w-full btn-primary flex items-center justify-center">
                 <ShoppingBag size={18} className="ml-2" />
                 إنشاء توزيع جديد
               </button>

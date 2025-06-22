@@ -162,7 +162,7 @@ const Inventory = () => {
 {showAddModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-      <h2 className="text-lg font-bold mb-4">إضافة صنف جديد</h2>
+      <h2 onClick={() => setShowAddModal(true)} className="text-lg font-bold mb-4">إضافة صنف جديد</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -422,7 +422,7 @@ const Inventory = () => {
           <div className="text-gray-500 mb-4">
             لا توجد أصناف تطابق معايير البحث
           </div>
-          <button className="btn-primary inline-flex items-center">
+          <button onClick={() => setShowAddModal(true)} className="btn-primary inline-flex items-center">
             <Plus size={18} className="ml-2" />
             إضافة صنف جديد
           </button>
